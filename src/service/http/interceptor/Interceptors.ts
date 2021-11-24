@@ -1,9 +1,5 @@
 import axios from 'axios';
-import {BaseServiceImpl} from '@/service/http/BaseServiceImpl';
-// @ts-ignore
-import * as queryString from 'querystring';
 import {Exception} from '@/service/http/exception/Exception';
-import {HTTPMethod} from '@/constants/HTTPMethod';
 
 /**
  * axios拦截器
@@ -35,11 +31,6 @@ export class Interceptors {
             if (option.headers) {
                 option.headers.token = '';
             }
-            if (option.method === HTTPMethod.POST) {
-                this.setTransformRequest(option);
-            } else {
-                this.setParamsSerializer(option);
-            }
             return option;
         }, (error) => {
             return Promise.reject(new Exception(error));
@@ -58,20 +49,4 @@ export class Interceptors {
         });
     }
 
-    private setTransformRequest(option: any) {
-        option.transformRequest = [function(data: any) {
-            // 检查是否以json方式传参
-            const contentType = option.headers ? option.headers['Content-Type'] : null;
-            if (contentType && contentType === BaseServiceImpl.jsonContentType) {
-                return data;
-            }
-            return queryString.stringify(data);
-        }];
-    }
-
-    private setParamsSerializer(option: any) {
-        option.paramsSerializer = function(params: any) {
-            return queryString.stringify(params);
-        };
-    }
 }
